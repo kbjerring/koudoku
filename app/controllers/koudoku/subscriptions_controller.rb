@@ -64,6 +64,11 @@ module Koudoku
       # this is a Devise default variable and thus should not change its name
       # when we change subscription owners from :user to :company 
       session["user_return_to"] = new_subscription_path(plan: params[:plan])
+
+      puts "/////// SO FAR SO GOOD /////////////////////////////////"
+      puts session["user_return_to"]
+      puts Koudoku.subscriptions_owned_by
+
       redirect_to new_registration_path(Koudoku.subscriptions_owned_by.to_s)
     end
 
@@ -87,14 +92,20 @@ module Koudoku
     end
 
     def new
+      puts "//////////////////////////////////////////////////////////////////////"
+      puts " We are in 'new' "
       if no_owner?
-
+        puts "no_owner = true"
+        
         if defined?(Devise)
+          puts "Devise is defined"
 
           # by default these methods support devise.
           if current_owner
             redirect_to new_owner_subscription_path(current_owner, plan: params[:plan])
           else
+            puts "Nu tror vi det fejler"
+
             redirect_to_sign_up
           end
           
