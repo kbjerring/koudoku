@@ -68,8 +68,11 @@ module Koudoku
       puts "/////// SO FAR SO GOOD /////////////////////////////////"
       puts session["user_return_to"]
       puts Koudoku.subscriptions_owned_by
-
+      puts "////////// nu kommer new_registration_path 'user'  registration"
+      puts new_registration_path(Koudoku.subscriptions_owned_by.to_s)
+      puts new_user_registration_path
       redirect_to new_registration_path(Koudoku.subscriptions_owned_by.to_s)
+
     end
 
     def index
