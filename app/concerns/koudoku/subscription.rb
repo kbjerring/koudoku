@@ -139,19 +139,19 @@ module Koudoku::Subscription
   def describe_difference(plan_to_describe)
     if plan.nil?
       if persisted?
-        "Upgrade"
+        "Vælg"
       else
         if Koudoku.free_trial?
-          "Start Trial"
+          "Prøvemedlem"
         else
-          "Upgrade"
+          "Vælg"
         end
       end
     else
       if plan_to_describe.is_upgrade_from?(plan)
-        "Upgrade"
+        "Vælg"
       else
-        "Downgrade"
+        "Vælg"
       end
     end
   end

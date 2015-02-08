@@ -8,17 +8,17 @@ module Koudoku
     def plan_interval(plan)
       case plan.interval
       when "month"
-        "month"
+        "pr. måned"
       when "year"
-        "year"
+        "pr. år"
       when "week"
-        "week"
+        "pr. uge"
       when "6-month"
-        "half-year"
+        "pr. halvår"
       when "3-month"
-        "quarter"
+        "pr. kvartal"
       else 
-        "month"
+        "pr. måned"
       end
     end
     

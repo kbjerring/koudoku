@@ -64,10 +64,8 @@ module Koudoku
       # this is a Devise default variable and thus should not change its name
       # when we change subscription owners from :user to :company 
       session["user_return_to"] = new_subscription_path(plan: params[:plan])
-      puts "////////// nu kommer new_user_registration_path 'user'  registration"
-      # redirect_to new_registration_path(Koudoku.subscriptions_owned_by.to_s)
-      redirect_to new_user_registration_path
-
+      session["new_plan"] = params[:plan]
+      redirect_to new_registration_path(Koudoku.subscriptions_owned_by.to_sym)
     end
 
     def index
@@ -90,18 +88,15 @@ module Koudoku
     end
 
     def new
-      puts "//////////////////////////////////////////////////////////////////////"
+      @plan = ::Plan.find(params[:plan])
       if no_owner?
         
         if defined?(Devise)
-          puts "Devise is defined"
 
           # by default these methods support devise.
           if current_owner
             redirect_to new_owner_subscription_path(current_owner, plan: params[:plan])
           else
-            puts "Nu tror vi det fejler"
-
             redirect_to_sign_up
           end
           
@@ -126,11 +121,15 @@ module Koudoku
       @subscription.subscription_owner = @owner
       @subscription.coupon_code = session[:koudoku_coupon_code]
       
+      @user = @subscription.user
+
       if @subscription.save
+        @user.status = 'active'
+        @user.save
         flash[:notice] = after_new_subscription_message
         redirect_to after_new_subscription_path 
       else
-        flash[:error] = 'There was a problem processing this transaction.'
+        flash[:error] = 'Der opstod desværre en fejl.'
         render :new
       end
     end
@@ -139,7 +138,12 @@ module Koudoku
     end
 
     def cancel
-      flash[:notice] = "You've successfully cancelled your subscription."
+      flash[:notice] = "Du har slettet dit medlemsskab."
+      
+      @user = @subscription.user
+      @user.status = 'passive'
+      @user.save
+
       @subscription.plan_id = nil
       @subscription.save
       redirect_to owner_subscription_path(@owner, @subscription)
@@ -149,11 +153,12 @@ module Koudoku
     end
 
     def update
+      
       if @subscription.update_attributes(subscription_params)
-        flash[:notice] = "You've successfully updated your subscription."
+        flash[:notice] = "Du har opdateret dit medlemsskab."
         redirect_to owner_subscription_path(@owner, @subscription)
       else
-        flash[:error] = 'There was a problem processing this transaction.'
+        flash[:error] = 'Der opstod desværre en fejl.'
         render :edit
       end
     end
@@ -180,7 +185,7 @@ module Koudoku
       controller = ::ApplicationController.new
       controller.respond_to?(:new_subscription_notice_message) ? 
           controller.try(:new_subscription_notice_message) : 
-          "You've been successfully upgraded."
+          "Du har opdateret dit medlemsskab."
     end
   end
 end
