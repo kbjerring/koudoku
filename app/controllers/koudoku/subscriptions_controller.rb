@@ -153,8 +153,8 @@ module Koudoku
     end
 
     def update
-      
       if @subscription.update_attributes(subscription_params)
+        @owner.update_status
         flash[:notice] = "Du har opdateret dit medlemsskab."
         redirect_to owner_subscription_path(@owner, @subscription)
       else
