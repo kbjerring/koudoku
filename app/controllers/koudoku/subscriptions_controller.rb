@@ -88,15 +88,26 @@ module Koudoku
     end
 
     def new
+      puts "nu finder vi planen"
+
       @plan = ::Plan.find(params[:plan])
+
+      puts "Her er den"
+      puts @plan
+
       if no_owner?
+        puts "No owner"
         
         if defined?(Devise)
-
+          puts "current_owner "
+          puts current_owner
           # by default these methods support devise.
           if current_owner
+            puts "nu re-directer vi til..."
+            puts new_owner_subscription_path(current_owner, plan: params[:plan])
             redirect_to new_owner_subscription_path(current_owner, plan: params[:plan])
           else
+            puts "Her går vi tilbage til signup   1111"
             redirect_to_sign_up
           end
           
@@ -105,8 +116,10 @@ module Koudoku
         end
 
       else
+        puts "Owner exists - subscritions generated"
         @subscription = ::Subscription.new
         @subscription.plan = ::Plan.find(params[:plan])
+        puts "Done sub creation"
       end
     end
 
@@ -117,19 +130,31 @@ module Koudoku
     end
 
     def create
+      puts "Nu er vi i create"
       @subscription = ::Subscription.new(subscription_params)
       @subscription.subscription_owner = @owner
       @subscription.coupon_code = session[:koudoku_coupon_code]
       
+      puts "Subscriptions er loaded nu"
       @user = @subscription.user
 
+      puts @user
+      puts @subscription.to_yaml
+
       if @subscription.save
-        @user.status = 'active'
+        puts " SUCCESS  "
+        if @subscription.plan_id == 1
+          @user.status = 'support'
+        else
+          @user.status = 'active'
+        end
         @user.save
         flash[:notice] = after_new_subscription_message
+        puts @subscription.to_yaml
         redirect_to after_new_subscription_path 
       else
-        flash[:error] = 'Der opstod desværre en fejl.'
+        puts "Create fejl"
+        flash[:error] = 'Der opstod desværre en fejl med dit kort. Prøv venligst igen'
         render :new
       end
     end
